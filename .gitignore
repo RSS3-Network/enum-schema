@@ -1,0 +1,10 @@
+.idea
+.vscode
+
+.run
+
+.DS_Store
+
+/build
+/traces.log
+/air.log
