@@ -25,7 +25,6 @@ var command = &cobra.Command{
 	Use:   "enum schema",
 	Short: "Generate schema",
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		var (
 			dir string
 			g   Generator

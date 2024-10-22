@@ -144,7 +144,7 @@ func (f *File) genDecl(node ast.Node) bool {
 			}
 			v := Value{
 				originalName: n.Name,
-				name:         n.Name,
+				name:         strings.ToLower(n.Name),
 				value:        u64,
 				signed:       info&types.IsUnsigned == 0,
 				str:          value.String(),
