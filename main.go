@@ -12,6 +12,13 @@ var (
 	lineComment bool
 	indent      bool
 	output      string
+	example     string
+	description string
+
+	xGoType            string
+	xGoTypeImportPath  string
+	xGoTypeImportName  string
+	xGoTypeSkipPointer bool
 )
 
 var command = &cobra.Command{
@@ -32,7 +39,11 @@ var command = &cobra.Command{
 
 		g.parsePackage(args, []string{})
 
-		if err := g.generate(typeName, lineComment, indent); err != nil {
+		if err := g.generate(
+			typeName, example, description,
+			lineComment, indent,
+			xGoType, xGoTypeImportPath, xGoTypeImportName, xGoTypeSkipPointer,
+		); err != nil {
 			return err
 		}
 
@@ -57,6 +68,13 @@ func init() {
 	command.PersistentFlags().BoolVar(&lineComment, "line-comment", false, "line comment")
 	command.PersistentFlags().BoolVar(&indent, "indent", false, "indent")
 	command.PersistentFlags().StringVar(&output, "output", "schema.json", "output file")
+	command.PersistentFlags().StringVar(&example, "example", "", "example")
+	command.PersistentFlags().StringVar(&description, "description", "", "description")
+
+	command.PersistentFlags().StringVar(&xGoType, "x-go-type", "", "x-go-type")
+	command.PersistentFlags().StringVar(&xGoTypeImportPath, "x-go-type-import-path", "", "x-go-type-import-path")
+	command.PersistentFlags().StringVar(&xGoTypeImportName, "x-go-type-import-name", "", "x-go-type-import-name")
+	command.PersistentFlags().BoolVar(&xGoTypeSkipPointer, "x-go-type-skip-optional-pointer", false, "x-go-type-skip-pointer")
 }
 
 func main() {

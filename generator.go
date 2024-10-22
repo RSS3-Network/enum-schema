@@ -161,9 +161,10 @@ func (f *File) genDecl(node ast.Node) bool {
 }
 
 func (g *Generator) generate(
-	typeName string,
-	lineComment bool,
-	indent bool,
+	typeName, example, description string,
+	lineComment, indent bool,
+	xGoType, xGoTypeImportPath, xGoTypeImportName string,
+	xGoTypeSkipPointer bool,
 ) error {
 
 	values := make([]Value, 0, 100)
@@ -182,6 +183,34 @@ func (g *Generator) generate(
 	schema.Enum = lo.Map(values, func(item Value, index int) any {
 		return item.name
 	})
+	if example != "" {
+		schema.Example = example
+	}
+	if description != "" {
+		schema.Description = description
+	}
+
+	extensions := map[string]interface{}{}
+
+	if xGoType != "" {
+		extensions["x-go-type"] = xGoType
+	}
+
+	if xGoTypeImportPath != "" || xGoTypeImportName != "" {
+		typeImport := map[string]string{}
+		if xGoTypeImportPath != "" {
+			typeImport["path"] = xGoTypeImportPath
+		}
+		if xGoTypeImportName != "" {
+			typeImport["name"] = xGoTypeImportName
+		}
+		extensions["x-go-type-import"] = typeImport
+	}
+	if xGoTypeSkipPointer {
+		extensions["x-go-type-skip-optional-pointer"] = xGoTypeSkipPointer
+	}
+
+	schema.Extensions = extensions
 
 	encoder := json.NewEncoder(&g.buf)
 	if indent {
