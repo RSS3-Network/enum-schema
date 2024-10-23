@@ -1,0 +1,7 @@
+type: string
+{{- with .Values }}
+enum:
+{{- range . }}
+  - {{ .name }}
+{{- end }}
+{{- end }}

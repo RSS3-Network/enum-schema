@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -110,4 +111,24 @@ func transformValueNames(values []Value, transformMethod string) []Value {
 	}
 
 	return values
+}
+
+func structToMap(obj interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	val := reflect.ValueOf(obj)
+
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	typ := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		fieldName := typ.Field(i).Name
+		fieldValue := val.Field(i).Interface()
+		result[fieldName] = fieldValue
+	}
+
+	return result
 }

@@ -2,9 +2,7 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/samber/lo"
 	"go/ast"
 	exact "go/constant"
@@ -13,6 +11,7 @@ import (
 	"golang.org/x/tools/go/packages"
 	"log"
 	"strings"
+	"text/template"
 )
 
 type Generator struct {
@@ -161,11 +160,8 @@ func (f *File) genDecl(node ast.Node) bool {
 }
 
 func (g *Generator) generate(
-	typeName, example, description string,
-	lineComment, indent bool,
-	trimPrefix, addPrefix, transform string,
-	xGoType, xGoTypeImportPath, xGoTypeImportName string,
-	xGoTypeSkipPointer bool,
+	typeName, trimPrefix, addPrefix, transform string,
+	templateFile string, lineComment bool,
 ) error {
 
 	values := make([]Value, 0, 100)
@@ -186,44 +182,24 @@ func (g *Generator) generate(
 
 	values = prefixValueNames(values, addPrefix)
 
-	schema := openapi3.NewStringSchema()
-	schema.Enum = lo.Map(values, func(item Value, index int) any {
-		return item.name
+	// Open Template File
+	tmpl, err := template.ParseFiles(templateFile)
+	if err != nil {
+		return err
+	}
+
+	// Execute Template
+	err = tmpl.Execute(&g.buf, map[string]any{
+		"Values": lo.Map(values, func(item Value, index int) map[string]any {
+			return map[string]interface{}{
+				"name":         item.name,
+				"value":        item.value,
+				"str":          item.str,
+				"originalName": item.originalName,
+				"signed":       item.signed,
+			}
+		}),
 	})
-	if example != "" {
-		schema.Example = example
-	}
-	if description != "" {
-		schema.Description = description
-	}
-
-	extensions := map[string]interface{}{}
-
-	if xGoType != "" {
-		extensions["x-go-type"] = xGoType
-	}
-
-	if xGoTypeImportPath != "" || xGoTypeImportName != "" {
-		typeImport := map[string]string{}
-		if xGoTypeImportPath != "" {
-			typeImport["path"] = xGoTypeImportPath
-		}
-		if xGoTypeImportName != "" {
-			typeImport["name"] = xGoTypeImportName
-		}
-		extensions["x-go-type-import"] = typeImport
-	}
-	if xGoTypeSkipPointer {
-		extensions["x-go-type-skip-optional-pointer"] = xGoTypeSkipPointer
-	}
-
-	schema.Extensions = extensions
-
-	encoder := json.NewEncoder(&g.buf)
-	if indent {
-		encoder.SetIndent("", "  ")
-	}
-	err := encoder.Encode(schema)
 	if err != nil {
 		return err
 	}
