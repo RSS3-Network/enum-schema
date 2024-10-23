@@ -199,6 +199,7 @@ func (g *Generator) generate(
 				"signed":       item.signed,
 			}
 		}),
+		"Name": typeName,
 	})
 	if err != nil {
 		return err
