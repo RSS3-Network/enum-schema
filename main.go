@@ -15,6 +15,10 @@ var (
 	example     string
 	description string
 
+	trimPrefix string
+	addPrefix  string
+	transform  string
+
 	xGoType            string
 	xGoTypeImportPath  string
 	xGoTypeImportName  string
@@ -26,13 +30,13 @@ var command = &cobra.Command{
 	Short: "Generate schema",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			dir string
+			dir = "."
 			g   Generator
 		)
 
 		if len(args) == 1 && isDirectory(args[0]) {
 			dir = args[0]
-		} else {
+		} else if len(args) > 0 {
 			dir = filepath.Dir(args[0])
 		}
 
@@ -41,6 +45,7 @@ var command = &cobra.Command{
 		if err := g.generate(
 			typeName, example, description,
 			lineComment, indent,
+			trimPrefix, addPrefix, transform,
 			xGoType, xGoTypeImportPath, xGoTypeImportName, xGoTypeSkipPointer,
 		); err != nil {
 			return err
@@ -64,11 +69,15 @@ var command = &cobra.Command{
 
 func init() {
 	command.PersistentFlags().StringVar(&typeName, "type", "", "type name")
-	command.PersistentFlags().BoolVar(&lineComment, "line-comment", false, "line comment")
+	command.PersistentFlags().BoolVar(&lineComment, "linecomment", false, "line comment")
 	command.PersistentFlags().BoolVar(&indent, "indent", false, "indent")
 	command.PersistentFlags().StringVar(&output, "output", "schema.json", "output file")
 	command.PersistentFlags().StringVar(&example, "example", "", "example")
 	command.PersistentFlags().StringVar(&description, "description", "", "description")
+
+	command.PersistentFlags().StringVar(&trimPrefix, "trimprefix", "", "trim prefix")
+	command.PersistentFlags().StringVar(&addPrefix, "addprefix", "", "add prefix")
+	command.PersistentFlags().StringVar(&transform, "transform", "", "transform")
 
 	command.PersistentFlags().StringVar(&xGoType, "x-go-type", "", "x-go-type")
 	command.PersistentFlags().StringVar(&xGoTypeImportPath, "x-go-type-import-path", "", "x-go-type-import-path")

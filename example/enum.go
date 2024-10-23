@@ -1,10 +1,10 @@
 package example
 
-//go:generate go run ../ --type=Fruit --line-comment --indent ./
+//go:generate go run ../ --type=Fruit --trimprefix=F --transform=snake  --indent
 type Fruit uint8
 
 const (
-	Apple  Fruit = iota // apple
-	Banana              // bananana
-	Cherry              // cherries
+	FApple  Fruit = iota // apple
+	FBanana              // bananana
+	FCherry              // cherries
 )

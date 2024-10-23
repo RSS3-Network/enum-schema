@@ -4,6 +4,7 @@ go 1.23.2
 
 require (
 	github.com/getkin/kin-openapi v0.128.0
+	github.com/pascaldekloe/name v1.0.1
 	github.com/samber/lo v1.47.0
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/tools v0.26.0

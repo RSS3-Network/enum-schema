@@ -144,7 +144,7 @@ func (f *File) genDecl(node ast.Node) bool {
 			}
 			v := Value{
 				originalName: n.Name,
-				name:         strings.ToLower(n.Name),
+				name:         n.Name,
 				value:        u64,
 				signed:       info&types.IsUnsigned == 0,
 				str:          value.String(),
@@ -163,6 +163,7 @@ func (f *File) genDecl(node ast.Node) bool {
 func (g *Generator) generate(
 	typeName, example, description string,
 	lineComment, indent bool,
+	trimPrefix, addPrefix, transform string,
 	xGoType, xGoTypeImportPath, xGoTypeImportName string,
 	xGoTypeSkipPointer bool,
 ) error {
@@ -178,6 +179,12 @@ func (g *Generator) generate(
 	if len(values) == 0 {
 		return fmt.Errorf("no values defined for type %s", typeName)
 	}
+
+	values = trimValueNames(values, trimPrefix)
+
+	values = transformValueNames(values, transform)
+
+	values = prefixValueNames(values, addPrefix)
 
 	schema := openapi3.NewStringSchema()
 	schema.Enum = lo.Map(values, func(item Value, index int) any {
